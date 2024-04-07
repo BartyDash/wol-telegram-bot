@@ -1,7 +1,8 @@
 #include <ESP8266WiFi.h>
+#include "secrets.h"
 
-const char* ssid = "";
-const char* password = "";
+const char* ssid = SECRET_SSID;
+const char* password = SECRET_PASS;
 
 void setup() {
   Serial.begin(115200);         // Start the Serial communication to send messages to the computer
