@@ -6,4 +6,5 @@ Passwords and sensitive data are stored in the `secrets.h` file. Save the file i
 ```c++
 #define SECRET_SSID "your_ssid"
 #define SECRET_PASS "your_password"
+#define BOT_TOKEN "0000000000:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 ```
