@@ -2,6 +2,8 @@
 #include <WiFiClientSecure.h>
 #include "secrets.h"
 #include <UniversalTelegramBot.h>
+#include <WiFiUdp.h>
+#include <WakeOnLan.h>
 
 const char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS;
@@ -11,6 +13,8 @@ const unsigned long BOT_MTBS = 1000; // mean time between scan messages
 X509List cert(TELEGRAM_CERTIFICATE_ROOT);
 WiFiClientSecure secured_client;
 UniversalTelegramBot bot(BOT_TOKEN, secured_client);
+WiFiUDP UDP;
+WakeOnLan WOL(UDP);
 
 unsigned long bot_lasttime;          // last time messages' scan has been done
 const int ledPin = LED_BUILTIN;
@@ -32,7 +36,7 @@ void handleNewMessages(int numNewMessages)
     if (from_name == "") from_name = "Guest";
 
     if (text == "/wol") {
-      //  WOL function
+      sendWOL();
       bot.sendMessage(chat_id, "Magic Packet sent!", "");
     } else if (text == "/ping") {
       bot.sendMessage(chat_id, "Pong.", "");
@@ -53,6 +57,13 @@ void handleNewMessages(int numNewMessages)
       bot.sendMessage(chat_id, welcome, "Markdown");
     }
   }
+}
+
+void sendWOL() {
+  digitalWrite(ledPin, LOW);
+  WOL.sendMagicPacket(MAC_ADDR); // send WOL on default port (9)
+  delay(300);
+  digitalWrite(ledPin, HIGH);
 }
 
 void setup() {
@@ -78,6 +89,8 @@ void setup() {
   Serial.println(" OK");
   Serial.print("\nWiFi connected. IP address:\t");
   Serial.println(WiFi.localIP());
+
+  WOL.calculateBroadcastAddress(WiFi.localIP(), WiFi.subnetMask());
 }
 
 void loop() {
