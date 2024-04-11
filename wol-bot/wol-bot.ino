@@ -4,6 +4,8 @@
 #include <UniversalTelegramBot.h>
 #include <WiFiUdp.h>
 #include <WakeOnLan.h>
+#include <ESPping.h>
+#include <string>
 
 const char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS;
@@ -40,6 +42,8 @@ void handleNewMessages(int numNewMessages)
       bot.sendMessage(chat_id, "Magic Packet sent!", "");
     } else if (text == "/ping") {
       bot.sendMessage(chat_id, "Pong.", "");
+    } else if (text == "/status") {
+      bot.sendMessage(chat_id, pingPc(), "");
     } else if (text == "/ledon") {
       digitalWrite(ledPin, LOW); // turn the LED on
       bot.sendMessage(chat_id, "Led is ON", "");
@@ -52,6 +56,7 @@ void handleNewMessages(int numNewMessages)
       welcome += "Here are the available commands:\n";
       welcome += "/wol : Send the Magic Packet\n";
       welcome += "/ping : Check the bot status\n";
+      welcome += "/status : Check the PC status\n";
       welcome += "/ledon : Switch the Led ON\n";
       welcome += "/ledoff : Switch the Led OFF\n";
       bot.sendMessage(chat_id, welcome, "Markdown");
@@ -64,6 +69,17 @@ void sendWOL() {
   WOL.sendMagicPacket(MAC_ADDR); // send WOL on default port (9)
   delay(300);
   digitalWrite(ledPin, HIGH);
+}
+
+const String pingPc() {
+    bool ret = Ping.ping(PC_IP);
+    String message = "PC is ";
+    if (ret) {
+      message += "ON";
+    } else {
+      message += "OFF";
+    }
+    return message;
 }
 
 void setup() {
