@@ -121,5 +121,5 @@ void loop() {
 
     bot_lasttime = millis();
   }
-  //delay(10);
+  delay(10);
 }
