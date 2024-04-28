@@ -11,6 +11,8 @@ const char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS;
 
 const unsigned long BOT_MTBS = 1000; // mean time between scan messages
+const unsigned long RESET_TIME = 3600000;
+unsigned long previousReset;
 
 X509List cert(TELEGRAM_CERTIFICATE_ROOT);
 WiFiClientSecure secured_client;
@@ -83,6 +85,8 @@ const String pingPc() {
 }
 
 void setup() {
+  ESP.wdtEnable(WDTO_8S);       // watchdog timer initialization- set to 8 sec
+
   Serial.begin(115200);         // Start the Serial communication to send messages to the computer
 
   pinMode(ledPin, OUTPUT); // initialize digital ledPin as an output.
@@ -107,6 +111,8 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   WOL.calculateBroadcastAddress(WiFi.localIP(), WiFi.subnetMask());
+
+  ESP.wdtFeed();  //  watchdog timer feed
 }
 
 void loop() {
@@ -121,5 +127,10 @@ void loop() {
 
     bot_lasttime = millis();
   }
+  if (millis() - previousReset > RESET_TIME) {
+    ESP.restart();
+  }
   delay(10);
+
+  ESP.wdtFeed();  // watchdog timer feed in main loop
 }
