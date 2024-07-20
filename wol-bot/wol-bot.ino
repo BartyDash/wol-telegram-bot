@@ -42,6 +42,8 @@ void handleNewMessages(int numNewMessages)
     if (text == "/wol") {
       sendWOL();
       bot.sendMessage(chat_id, "Magic Packet sent!", "");
+      String externalIP = getExternalIP();
+      bot.sendMessage(chat_id, "External IP: " + externalIP, "");
     } else if (text == "/ping") {
       bot.sendMessage(chat_id, "Pong.", "");
     } else if (text == "/status") {
@@ -82,6 +84,40 @@ const String pingPc() {
       message += "OFF";
     }
     return message;
+}
+
+String getExternalIP() {
+  WiFiClientSecure client;
+  client.setInsecure(); // Use this if you don't want to verify the certificate
+  
+  const char* host = "api.ipify.org";
+  const int httpsPort = 443;
+  
+  if (!client.connect(host, httpsPort)) {
+    Serial.println("Connection to api.ipify.org failed");
+    return "Connection failed";
+  }
+  
+  client.print(String("GET / HTTP/1.1\r\n") +
+               "Host: " + host + "\r\n" + 
+               "User-Agent: ESP8266\r\n" + 
+               "Connection: close\r\n\r\n");
+  
+  while (client.connected() && !client.available()) {
+    delay(10);
+  }
+  
+  String line;
+  while (client.available()) {
+    line = client.readStringUntil('\r');
+  }
+  
+  int index = line.indexOf('\n');
+  if (index > 0) {
+    line = line.substring(index + 1);
+  }
+  
+  return line;
 }
 
 void setup() {
